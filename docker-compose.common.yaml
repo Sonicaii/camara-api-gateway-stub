@@ -1,0 +1,94 @@
+services:
+
+  nginx:
+    image: nginx:1.27
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./tls/poochie.example.com.cert.pem:/etc/nginx/ssl/live/poochie.example.com.crt
+      - ./tls/poochie.example.com.key.pem:/etc/nginx/ssl/live/poochie.example.com.key
+    ports:
+      - '443:443'
+      - '80:80'
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - camara
+
+  camara-api-gateway:
+    build:
+      context: ./camara-api-gateway
+    environment:
+      JWKS_URI: http://keycloak:8880/auth/realms/operator/protocol/openid-connect/certs
+      ISSUER_URI: https://poochie.example.com/auth/realms/operator
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - camara
+    
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/keycloak?currentSchema=keycloak
+      KC_DB_USERNAME: keycloak_owner
+      KC_DB_PASSWORD: ${KEYCLOAK_OWNER_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HTTP_PORT: "8880"
+      KC_HOSTNAME: https://poochie.example.com/auth/
+      KC_HOSTNAME_ADMIN: https://admin.poochie.example.com/auth/
+      KC_HTTP_RELATIVE_PATH: /auth/
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_LOG_LEVEL: "debug"
+    command: start --import-realm
+    healthcheck:
+      test: timeout 10s bash -c ':> /dev/tcp/localhost/8880' || exit 1
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+      start_interval: 15s
+    volumes:
+      - ./keycloak/realms/realm.json:/opt/keycloak/data/import/realm.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - camara
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      KEYCLOAK_OWNER_PASSWORD: ${KEYCLOAK_OWNER_PASSWORD}
+    volumes:
+      - ./postgres/initdb.sh:/docker-entrypoint-initdb.d/initdb.sh:ro
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec pg_isready -U postgres -d keycloak" ]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+    networks:
+      - camara
+
+  number-verification-v1:
+    image: stoplight/prism:5.14.2
+    volumes:
+      - ./specifications/number-verification/v1:/tmp:ro
+    command: ["mock", "-h", "0.0.0.0", "/tmp/openapi.yaml"]
+    # ports:
+    #   - 4010:4010
+    networks:
+      - camara
+
+networks:
+  camara: {}
