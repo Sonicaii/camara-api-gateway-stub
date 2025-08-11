@@ -1,5 +1,5 @@
-issuer_url: https://keycloak:8880/realms/open-gateway
 apis:
   - spec: https://raw.githubusercontent.com/camaraproject/NumberVerification/refs/tags/r1.3/code/API_definitions/number-verification.yaml
-    service: http://number-verification:4180
     base_path: /number-verification/v1
+  - spec: https://raw.githubusercontent.com/camaraproject/NumberVerification/refs/tags/r2.4/code/API_definitions/number-verification.yaml
+    base_path: /number-verification/v2

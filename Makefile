@@ -23,15 +23,15 @@ APIS = apis.yaml
 .PHONY: all
 all: ca server  apis
 
-ca: $(CA_KEY) $(CA_CERT)
+ca: $(TLS_DIR) $(CA_KEY) $(CA_CERT)
 
 $(TLS_DIR):
 	mkdir $(TLS_DIR)
 
-$(CA_KEY): $(TLS_DIR)
+$(CA_KEY): 
 	openssl genrsa -out $(CA_KEY) 4096
 
-$(CA_CONFIG): $(TLS_DIR)
+$(CA_CONFIG): 
 	echo "[ req ]" > $(CA_CONFIG)
 	echo "prompt = no" >> $(CA_CONFIG)
 	echo "distinguished_name = req_distinguished_name" >> $(CA_CONFIG)
@@ -46,12 +46,12 @@ $(CA_CONFIG): $(TLS_DIR)
 $(CA_CERT): $(CA_KEY) $(CA_CONFIG)
 	openssl req -x509 -new -nodes -key $(CA_KEY) -sha256 -days 3650 -out $(CA_CERT) -config $(CA_CONFIG)
 
-server: $(SERVER_KEY) $(SERVER_CSR) $(SERVER_CERT)
+server: $(TLS_DIR) $(SERVER_KEY) $(SERVER_CSR) $(SERVER_CERT)
 
-$(SERVER_KEY): $(TLS_DIR)
+$(SERVER_KEY): 
 	openssl genrsa -out $(SERVER_KEY) 2048
 
-$(SERVER_CONFIG): $(TLS_DIR)
+$(SERVER_CONFIG): 
 	echo "[ req ]" > $(SERVER_CONFIG)
 	echo "prompt = no" >> $(SERVER_CONFIG)
 	echo "distinguished_name = req_distinguished_name" >> $(SERVER_CONFIG)
@@ -81,6 +81,8 @@ docker-compose.yaml: $(APIS)
 application.yaml: $(APIS)
 	uv run scripts/configure_camara_api_gateway.py $(APIS) > application.yaml
 
+.PHONY: clean
+clean: clean-tls clean-apis clean-data
 
 .PHONY: clean-tls
 clean-tls:

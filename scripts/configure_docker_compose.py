@@ -87,7 +87,7 @@ def configure_camara_api_gateway(config_path: str) -> dict:
 
         services[service_name] = {
             'build': {
-
+                'dockerfile': "prism.Dockerfile"
             },
             "volumes": [
                 f"./specifications{base_path}:/tmp:ro"
@@ -98,7 +98,7 @@ def configure_camara_api_gateway(config_path: str) -> dict:
 
     return {
         "services": services,
-        "networks": ["camara"]
+        "networks": {"camara": {}}
     }
 
 

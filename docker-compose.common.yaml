@@ -21,6 +21,9 @@ services:
     environment:
       JWKS_URI: http://keycloak:8880/auth/realms/operator/protocol/openid-connect/certs
       ISSUER_URI: https://poochie.example.com/auth/realms/operator
+    command: ["--spring.config.location=classpath:application.yaml,file:///application.yaml"]
+    volumes: 
+      - "./application.yaml:/application.yaml:ro"
     depends_on:
       keycloak:
         condition: service_healthy
@@ -44,7 +47,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: xforwarded
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
-      KC_LOG_LEVEL: "debug"
+      # KC_LOG_LEVEL: "debug"
     command: start --import-realm
     healthcheck:
       test: timeout 10s bash -c ':> /dev/tcp/localhost/8880' || exit 1
