@@ -1,11 +1,11 @@
 import yaml
 import sys
-import re
+import json
 
 
-def configure_camara_api_gateway(config_path: str) -> dict:
+def configure_keycloak_realm(config_path: str) -> dict:
     """
-    Generates a CAMARA API Gateway configuration from a central YAML config file
+    Generates a Keycloak realm configuration from a central YAML config file
     that points to OpenAPI v3 specifications.
 
     Args:
@@ -26,7 +26,21 @@ def configure_camara_api_gateway(config_path: str) -> dict:
         print(f"Error: Could not parse YAML file. {e}", file=sys.stderr)
         sys.exit(1)
 
-    routes = []
+    realm_configuration_file = "./keycloak/realms/realm.json"
+    try:
+        with open(realm_configuration_file, "r") as f:
+            realm = json.load(f)
+    except FileNotFoundError:
+        print(
+            f"Error: Realm configuration file not found at '{realm_configuration_file}'",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    except yaml.YAMLError as e:
+        print(f"Error: Could not parse JSON file. {e}", file=sys.stderr)
+        sys.exit(1)
+
+    scopes = set()
 
     for apis_config in main_config.get("apis", []):
         base_path = apis_config.get("base_path")
@@ -69,6 +83,7 @@ def configure_camara_api_gateway(config_path: str) -> dict:
                 f"Warning: No OpenID Connect security scheme found for '{service_name}'. Cannot map scopes.",
                 file=sys.stderr,
             )
+            continue
 
         for path, path_item in spec.get("paths", {}).items():
             for method, operation in path_item.items():
@@ -83,65 +98,46 @@ def configure_camara_api_gateway(config_path: str) -> dict:
                 ]:
                     continue
 
-                # Convert OpenAPI path parameters ({param}) to a regex-friendly format
-                # This simple regex matches any character except a slash.
-                spec_path_regex = re.sub(r"\{[^}]+\}", r"[^/]+", path)
-
-                operation_id = operation.get(
-                    "operationId", f"{method}-{path.replace('/', '-')}"
-                )
-                route_name = f"{service_name}-{operation_id}"
-
-                route = {
-                    "id": route_name,
-                    "uri": f"http://{service_name}:4010",
-                    "predicates": [
-                        f"Path={base_path}{spec_path_regex}",
-                        f"Method={method.upper()}",
-                    ],
-                    "filters": [
-                        {
-                            "name": "RewritePath",
-                            "args": {
-                                "regexp": f"{base_path}/(?<segment>.*)",
-                                "replacement": "/$\{segment}",
-                            },
-                        }
-                    ],
-                }
-
-                if "security" in operation and scheme_name:
+                if "security" in operation:
                     for security_req in operation["security"]:
                         if scheme_name in security_req:
-                            scopes = security_req[scheme_name]
-                            if scopes:
-                                for scope in scopes:
-                                    check_scope = {
-                                        "name": "CheckScope",
-                                        "args": {
-                                            "scope": scope,
-                                        },
-                                    }
-                                    route["filters"].append(check_scope)
-                            break
 
-                routes.append(route)
+                            for scope in security_req.get(scheme_name, []):
+                                scopes.add(scope)
 
-    return {
-        "spring": {"cloud": {"gateway": {"server": {"webflux": {"routes": routes}}}}}
-    }
+    client_scopes = realm.get("clientScopes", [])
+    for scope in scopes:
+        client_scopes.append(
+            {
+                "name": scope,
+                "description": "number verification verify scope",
+                "protocol": "openid-connect",
+                "attributes": {
+                    "include.in.token.scope": "true",
+                    "display.on.consent.screen": "true",
+                },
+            }
+        )
+
+    realm["clientScopes"] = client_scopes
+
+    for client in realm.get("clients", []):
+        optional_scopes = client.get("optionalClientScopes", [])
+        for scope in scopes:
+            optional_scopes.append(scope)
+        client["optionalClientScopes"] = optional_scopes
+
+    return realm
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python configure_camara_api_gateway.py <path_to_config_yaml>")
+        print("Usage: python configure_keycloak_realm.py <path_to_config_yaml>")
         print("\nExample:")
-        print("  python configure_camara_api_gateway.py ./config.yaml")
+        print("  python configure_keycloak_realm.py ./config.yaml")
         sys.exit(1)
 
     config_file = sys.argv[1]
-    final_config = configure_camara_api_gateway(config_file)
+    final_config = configure_keycloak_realm(config_file)
 
-    print("# Generated CAMARA API Gateway Configuration")
-    print("---")
-    yaml.dump(final_config, sys.stdout, sort_keys=False, default_flow_style=False)
+    json.dump(final_config, sys.stdout, sort_keys=False, indent=2)

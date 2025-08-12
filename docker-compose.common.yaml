@@ -57,7 +57,7 @@ services:
       start_period: 60s
       start_interval: 15s
     volumes:
-      - ./keycloak/realms/realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ./realm.json:/opt/keycloak/data/import/realm.json:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -6,7 +6,7 @@ import re
 def configure_camara_api_gateway(config_path: str) -> dict:
     """
     Generates a Docker Compose configuration from a central YAML config file
-    that points to OpenAPI v3 specifications and default services extended from 
+    that points to OpenAPI v3 specifications and default services extended from
     docker-compose.common.yaml.
 
     Args:
@@ -37,24 +37,24 @@ def configure_camara_api_gateway(config_path: str) -> dict:
 
     services["camara-api-gateway"] = {
         "extends": {
-           "file": "docker-compose.common.yaml",
-            "service": "camara-api-gateway", 
+            "file": "docker-compose.common.yaml",
+            "service": "camara-api-gateway",
         },
     }
 
     services["keycloak"] = {
         "extends": {
-           "file": "docker-compose.common.yaml",
-            "service": "keycloak", 
+            "file": "docker-compose.common.yaml",
+            "service": "keycloak",
         },
     }
 
     services["postgres"] = {
         "extends": {
-           "file": "docker-compose.common.yaml",
-            "service": "postgres", 
+            "file": "docker-compose.common.yaml",
+            "service": "postgres",
         },
-    } 
+    }
 
     for apis_config in main_config.get("apis", []):
         base_path = apis_config.get("base_path")
@@ -83,23 +83,16 @@ def configure_camara_api_gateway(config_path: str) -> dict:
             )
             continue
 
-        service_name = f"{spec['info']['title'].replace(' ', '-').lower()}-{spec['info']['version'].replace('.', '-')}"
+        service_name = f"api{base_path.replace('/', '-').lower()}"
 
         services[service_name] = {
-            'build': {
-                'dockerfile': "prism.Dockerfile"
-            },
-            "volumes": [
-                f"./specifications{base_path}:/tmp:ro"
-            ],
+            "build": {"dockerfile": "prism.Dockerfile"},
+            "volumes": [f"./specifications{base_path}:/tmp:ro"],
             "command": ["mock", "-h", "0.0.0.0", "/tmp/openapi.yaml"],
-            "networks": ["camara"]
+            "networks": ["camara"],
         }
 
-    return {
-        "services": services,
-        "networks": {"camara": {}}
-    }
+    return {"services": services, "networks": {"camara": {}}}
 
 
 if __name__ == "__main__":

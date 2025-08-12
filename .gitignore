@@ -16,3 +16,4 @@ application.yaml
 docker-compose.yaml
 /specifications
 /tls
+realm.json

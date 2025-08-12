@@ -21,7 +21,7 @@ SERVER_CONFIG = $(TLS_DIR)/$(CN_SERVER)_config.txt
 APIS = apis.yaml
 
 .PHONY: all
-all: ca server  apis
+all: ca server data apis
 
 ca: $(TLS_DIR) $(CA_KEY) $(CA_CERT)
 
@@ -70,7 +70,7 @@ $(SERVER_CERT): $(SERVER_CSR) $(CA_CERT) $(CA_KEY)
 	openssl x509 -req -in $(SERVER_CSR) -CA $(CA_CERT) -CAkey $(CA_KEY) -CAcreateserial -out $(SERVER_CERT) -days 365 -sha256
 
 .PHONY: apis
-apis: specifications docker-compose.yaml application.yaml
+apis: specifications docker-compose.yaml application.yaml realm.json
 
 specifications: $(APIS)
 	uv run scripts/download_specifications.py $(APIS)
@@ -80,6 +80,12 @@ docker-compose.yaml: $(APIS)
 
 application.yaml: $(APIS)
 	uv run scripts/configure_camara_api_gateway.py $(APIS) > application.yaml
+
+realm.json: $(APIS)
+	uv run scripts/configure_keycloak_realm.py $(APIS) > realm.json
+
+data: 
+	mkdir data
 
 .PHONY: clean
 clean: clean-tls clean-apis clean-data
@@ -93,6 +99,7 @@ clean-apis:
 	rm -r specifications
 	rm docker-compose.yaml
 	rm application.yaml
+	rm realm.json
 
 .PHONY: clean-data
 clean-data:

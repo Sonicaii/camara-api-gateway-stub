@@ -3,8 +3,8 @@
   "enabled": true,
   "users": [
     {
-      "username": "test@poochie.dog",
-      "email": "test@poochie.dog",
+      "username": "rex@poochie.dog",
+      "email": "rex@poochie.dog",
       "firstName": "Reginald",
       "lastName": "von Ravenhorst",
       "credentials": [
@@ -29,21 +29,11 @@
       ],
       "standardFlowEnabled": true,
       "optionalClientScopes": [
-        "profile",
-        "number-verification:verify"
+        "profile"
       ]
     }
   ],
   "clientScopes": [
-    {
-      "name": "number-verification:verify",
-      "description": "number verification verify scope",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "true",
-        "display.on.consent.screen": "true"
-      }
-    },
     {
       "name": "roles",
       "description": "OpenID Connect built-in scope: roles",

@@ -143,7 +143,7 @@ The following Keycloak endpoints (exposed via the gateway) will also be of use:
 
 Keycloak is also configured with a single test user that can be used to login:
 
-- username: test@poochie.com
+- username: rex@poochie.com
 - password: password
 
 ```shell
@@ -182,7 +182,7 @@ https://poochie.example.com/auth/realms/operator/protocol/openid-connect/auth?cl
 **Step 2:** Authenticate
 Your browser will show a Keycloak login page. Because the project uses self-signed certificates, you may need to accept a browser security warning. Log in with the pre-configured test user:
 
-- username: test@poochie.com
+- username: rex@poochie.com
 - password: password
 
 **Step 3:** Extract the Code
