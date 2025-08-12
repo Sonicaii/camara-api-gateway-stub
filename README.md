@@ -71,7 +71,7 @@ You will need to add a number of hosts to your OS known hosts list - `/etc/hosts
 127.0.0.1 poochie.example.com
 ```
 
-### Set-up ([day-1 operations (ops)](https://octopus.com/blog/difference-between-day-0-1-2-operations) configuration)
+### Set-up - [day-1 operations (ops)](https://octopus.com/blog/difference-between-day-0-1-2-operations) configuration
 
 Primary day-1 ops targets are the configuration of TLS and sourcing CAMARA API specifications.
 
