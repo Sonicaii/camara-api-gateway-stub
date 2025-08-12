@@ -59,9 +59,7 @@ This project assumes you have access to the following tools:
 - [openssl](https://www.openssl.org/) - a utility for working with TLS, used to generate private keys and certificates
 - a browser - any will do
 
-> A note for Windows users:
->
-> This project assumes a unix-like environment, [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/) is recommended. PRs welcome for Windows users that get this guide working outside WSL :).
+> IMPORTANT (Windows users): This project assumes a unix-like environment, [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/) is recommended. PRs welcome for Windows users that get this guide working outside WSL :).
 
 #### Networking
 
@@ -73,17 +71,17 @@ You will need to add a number of hosts to your OS known hosts list - `/etc/hosts
 127.0.0.1 poochie.example.com
 ```
 
-### Set-up ([Day-1 Operations (Ops)](https://octopus.com/blog/difference-between-day-0-1-2-operations) configuration)
+### Set-up ([day-1 operations (ops)](https://octopus.com/blog/difference-between-day-0-1-2-operations) configuration)
 
-Primary day-1 Ops targets are the configuration of TLS and sourcing CAMARA API specifications.
+Primary day-1 ops targets are the configuration of TLS and sourcing CAMARA API specifications.
 
-Day-1 Ops scripts require `uv`, [install `uv`](https://docs.astral.sh/uv/getting-started/installation/) and initialize the project
+Day-1 ops scripts require `uv`, [install `uv`](https://docs.astral.sh/uv/getting-started/installation/) and initialize the project
 
 ```shell
 uv sync
 ```
 
-All day-1 Ops can be triggered via the provided `Makefile`
+All day-1 ops can be triggered via the provided `Makefile`
 
 ```shell
 make all
