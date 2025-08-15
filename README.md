@@ -39,10 +39,10 @@ This project deploys and manages the following services:
 
 ![Architecture](/docs/architecture.drawio.png)
 
-- [Prism](https://stoplight.io/open-source/prism) - OpenAPI mock server, used to deliver CAMARA API stubs that validate incoming requests and return example responses
-- [Keycloak](https://www.keycloak.org/) - OpenID Connect (OIDC) compliant Auth Server, used to simulate OIDC flows that protect CAMARA APIs
-- [nginx](https://nginx.org/en/) - Reverse proxy, simulates TLS
-- [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway) - an API gateway that exposes CAMARA APIs and enforces OIDC security according to CAMARA OpenAPI specifications
+- [Prism](https://stoplight.io/open-source/prism) - OpenAPI mock server, used to deliver CAMARA API stubs that validate incoming requests and return example responses.
+- [Keycloak](https://www.keycloak.org/) - OpenID Connect (OIDC) compliant Auth Server, used to simulate OIDC flows that protect CAMARA APIs.
+- [nginx](https://nginx.org/en/) - Reverse proxy, simulates TLS.
+- [Spring Cloud Gateway](https://spring.io/projects/spring-cloud-gateway) - an API gateway that exposes CAMARA APIs and enforces OIDC security according to CAMARA OpenAPI specifications.
 
 ## Usage
 
@@ -50,14 +50,14 @@ This project deploys and manages the following services:
 
 This project assumes you have access to the following tools:
 
-- [Docker](https://www.docker.com/) - consider installing [Docker Desktop](https://docs.docker.com/desktop/), other systems such as Podman are a available but this project has only been verified with Docker Desktop
-- [Docker Compose](https://docs.docker.com/compose/) - a tool for running multi-container applications, used to simplify starting the stub services - installed with most Docker installations
-- [uv](https://docs.astral.sh/uv/) - a package and project manager for Python, used to run a number of scripts that that configure the gateway
-- [curl](https://curl.se/docs/manpage.html) - pre-installed on most OS, used in examples in this guide
-- [jq](https://jqlang.org/) - a utility for working with JSON, used in examples in this guide to extract data from responses
-- [make](https://www.gnu.org/software/make/manual/make.html) - a build tool, used to run custom scripts, such as fetching CAMARA API specifications, or preparing certificates for TLS
-- [openssl](https://www.openssl.org/) - a utility for working with TLS, used to generate private keys and certificates
-- a browser - any will do
+- [Docker](https://www.docker.com/) - consider installing [Docker Desktop](https://docs.docker.com/desktop/), other systems such as Podman are a available but this project has only been verified with Docker Desktop.
+- [Docker Compose](https://docs.docker.com/compose/) - a tool for running multi-container applications, used to simplify starting the stub services - installed with most Docker installations.
+- [uv](https://docs.astral.sh/uv/) - a package and project manager for Python, used to run a number of scripts that that configure the gateway.
+- [curl](https://curl.se/docs/manpage.html) - pre-installed on most OS, used in examples in this guide.
+- [jq](https://jqlang.org/) - a utility for working with JSON, used in examples in this guide to extract data from responses.
+- [make](https://www.gnu.org/software/make/manual/make.html) - a build tool, used to run custom scripts, such as fetching CAMARA API specifications, or preparing certificates for TLS.
+- [openssl](https://www.openssl.org/) - a utility for working with TLS, used to generate private keys and certificates.
+- a browser - any will do.
 
 > IMPORTANT (Windows users): This project assumes a unix-like environment, [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/) is recommended. PRs welcome for Windows users that get this guide working outside WSL :).
 
@@ -73,15 +73,15 @@ You will need to add a number of hosts to your OS known hosts list - `/etc/hosts
 
 ### Set-up - [day-1 operations (ops)](https://octopus.com/blog/difference-between-day-0-1-2-operations) configuration
 
-Primary day-1 ops targets are the configuration of TLS and sourcing CAMARA API specifications.
+Primary day-1 ops configure TLS and and the gateway by sourcing CAMARA API specifications published by the CAMARA project. These preliminary actions need to be completed prior to starting any services.
 
-Day-1 ops scripts require `uv`, [install `uv`](https://docs.astral.sh/uv/getting-started/installation/) and initialize the project
+> Day-1 ops scripts require `uv`, [install `uv`](https://docs.astral.sh/uv/getting-started/installation/) and initialize the project.
+>
+> ```shell
+> uv sync
+> ```
 
-```shell
-uv sync
-```
-
-All day-1 ops can be triggered via the provided `Makefile`
+All day-1 ops can be triggered via the provided `Makefile`:
 
 ```shell
 make all
@@ -89,35 +89,37 @@ make all
 
 `make all` will:
 
-- Create a Certificate Authority and server certificates for Nginx
-- Download CAMARA OpenAPI specifications declared in `apis.yaml`
-- Generate an `application.yaml` configuration file for the CAMARA API Gateway
-- Generate a `docker-compose.yaml` to start all gateway services
+- Create a Certificate Authority and server certificates for Nginx.
+- Download CAMARA OpenAPI specifications declared in `apis.yaml`.
+- Generate an `application.yaml` configuration file for the CAMARA API Gateway.
+- Generate a `docker-compose.yaml` to start all gateway services.
 
 #### Sourcing CAMARA APIs
 
-OpenAPI v3 specifications for each CAMARA API can be accessed via the project's official [GitHub Organization](https://github.com/camaraproject/). this project provides a simple script to fetch CAMARA API specifications and configure the gateway accordingly.
+OpenAPI v3 specifications for each CAMARA API can be accessed via the project's official [GitHub Organization](https://github.com/camaraproject/). This project provides a simple script to fetch CAMARA API specifications and configure the gateway accordingly.
 
-To add APIs to the stub system add entries to `apis.yaml`, and example for the [Number Verification API](https://github.com/camaraproject/NumberVerification) is provided. Each entry must declare:
+To add APIs to the stub system add entries to `apis.yaml`, an example for the [Number Verification API](https://github.com/camaraproject/NumberVerification) is provided. Each entry must declare:
 
-- `spec` - a link to the raw OpenAPI v3 CAMARA API specification to be stubbed
-- `base_path`: - the base path that the CAMARA API Gateway should serve the stub. Left to the user to configure but a common convention is to follow the following format `/<api-name>/<api-major-version>` - make sure that this base path is unique to each stub.
+- `spec` - a link to the raw OpenAPI v3 CAMARA API specification to be stubbed.
+- `base_path`: - the base path that the CAMARA API Gateway should serve the stub. Left to the user to configure but a common convention follows the format `/<api-name>/<api-major-version>` - ensure that stubbed APIs do not share the same base path.
 
-If you update APIs declared in `apis.yaml`, run make to re-configure the Gateway and Docker Compose:
+If you update APIs declared in `apis.yaml`, run `make` to re-configure the Gateway and Docker Compose:
 
 ```shell
 make all
 ```
 
+> IMPORTANT: You may also need to run the `make clean-data` goal. See caveats and issues regarding Keycloak below.
+
 #### TLS
 
 CAMARA APIs are protected by TLS and this project makes efforts to simulate that.
 
-> A key limitation of this project is that the certificates generated by default are self signed, if you use these certificates you will need to add these certificates to the list of certificates trusted by your OS and possibly any http client you use in a consuming project. A simply why to trust these certificates is to visit the [Keycloak Admin UI](https://poochie.example.com/auth/) and proceed when your browser prompts you.
+> IMPORTANT: A key limitation of this project is that the certificates generated are self-signed, if you use these certificates you will need to add these certificates to the list of certificates trusted by your OS and possibly any HTTP client you use your project. A simple way to trust these certificates is to visit the [Keycloak Admin UI](https://poochie.example.com/auth/), most browsers will prompt you to trust the certificate.
 
 ### Start
 
-Copy `.env.example`, rename to `.env`, and set values for `<value>`,
+Copy `.env.example`, rename to `.env`, and set values for `<value>`.
 
 Start all gateway services:
 
@@ -125,24 +127,26 @@ Start all gateway services:
 make start
 ```
 
-Acquire an access token via the Authorization Code Flow (Curity provides a good [guide](https://curity.io/resources/learn/openid-code-flow/), or see Appendix below). Note that Keycloak is configured with a single client for this purpose, it's details can be discovered in `./keycloak/realms/realm.json`, and below for convenience:
+Acquire an access token via the Authorization Code Flow (Curity provides a good [guide](https://curity.io/resources/learn/openid-code-flow/), or see Appendix below). Note that Keycloak is configured with a single client for this purpose, it's details can be discovered in `./keycloak/realms/realm.json`, and are also provided below.
 
 | attribute | value |
 | ---- | --- |
 | client_id | developer-client |
 | client_secret | Yqp2jao1Ruc8UBwk7jwAIJ6Y1jsVT4qJHvQVpduK |
 
-The following Keycloak endpoints (exposed via the gateway) will also be of use:
+The following Keycloak endpoints (exposed via the gateway) will also be of use.
 
 | endpoint | url |
 | ---- | ---- |
 | authorization | <https://poochie.example.com/auth/realms/operator/protocol/openid-connect/auth> |
 | token | <https://poochie.example.com/auth/realms/operator/protocol/openid-connect/token> |
 
-Keycloak is also configured with a single test user that can be used to login:
+Keycloak is also configured with a single test user that can be used to login.
 
 - username: rex@poochie.com
 - password: password
+
+Once you have an access token, set it in your shell:
 
 ```shell
 export ACCESS_TOKEN=<access-token>
@@ -162,7 +166,7 @@ make stop
 
 ## Caveats and issues
 
-- Keycloak is configured to import the gateway realm on start up, however this only occurs if the realm does not yet exist. If you make changes to `apis.yaml` or the realm configuration directly you will need to purge the database - simply trash the `./data` directory and restart the services
+- Keycloak is configured to import the gateway realm on start up, however this only occurs if the realm does not yet exist. If you make changes to `apis.yaml` or the realm configuration directly you will need to purge the database - simply trash the `./data` directory and restart the services.
 
 ## Appendix
 
