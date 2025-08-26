@@ -178,41 +178,42 @@ To call the secure APIs, you must first get an access token from the Keycloak se
 Construct the following URL and paste it into your browser.
 
 ```shell
-https://poochie.example.com/auth/realms/operator/protocol/openid-connect/auth?client_id=developer-client&redirect_uri=http://localhost:8080/callback&response_type=code&scope=openid
+https://poochie.example.com/auth/realms/operator/protocol/openid-connect/auth?client_id=developer-client&redirect_uri=http://localhost:8080/callback&response_type=code&scope=openid%20number-verification%3Averify
 ```
+
+> IMPORTANT: the URL above only requests the `openid` and `number-verification:verify` scope, however it's very likely that you will need to request additional scopes for access to a specific API. Find the required scopes in each CAMARA API specification and provide them as a space delimited, URL encoded value to the `scope` query parameter. You can use `jq` to URL encode values:
+>
+> ```shell
+> echo -n 'openid number-verification:verify' | jq -Rr @uri
+> ```
 
 **Step 2:** Authenticate
 Your browser will show a Keycloak login page. Because the project uses self-signed certificates, you may need to accept a browser security warning. Log in with the pre-configured test user:
 
-- username: rex@poochie.com
+- username: rex@poochie.dog
 - password: password
 
-**Step 3:** Extract the Code
-After logging in, Keycloak will redirect you to `http://localhost:8080/callback...`. The page won't load (this is expected), but the URL in your browser's address bar will contain the authorization code. Copy the value of the code parameter from the URL.
+**Step 3:** Extract the code
+After logging in, Keycloak will redirect you to `http://localhost:8080/callback...`. The page won't load (this is expected), but the URL in your browser's address bar will contain the authorization code. Copy the value of the `code` query parameter from the URL.
 
-It will look something like this: `http://localhost:8080/callback?session_state=...&iss=...&code=1a2b3c4d-5e6f-7890-abcd-ef1234567890`
+The redirect URL will look something like this: `http://localhost:8080/callback?session_state=...&iss=...&code=1a2b3c4d-5e6f-7890-abcd-ef1234567890` - notice the `code` parameter toward the end.
 
-**Step 4:** Exchange the Code for an Access Token
+**Step 4:** Exchange the code for an access token
 Use the code you just copied in the following curl command to get an access token. Replace `<PASTE_YOUR_CODE_HERE>` with your code.
 
 ```shell
 export AUTH_CODE="<PASTE_YOUR_CODE_HERE>"
-
-curl -sX POST https://poochie.example.com/auth/realms/operator/protocol/openid-connect/token \
--d "grant_type=authorization_code" \
--d "client_id=developer-client" \
--d "client_secret=Yqp2jao1Ruc8UBwk7jwAIJ6Y1jsVT4qJHvQVpduK" \
--d "code=${AUTH_CODE}" \
--d "redirect_uri=http://localhost:8080/callback"
 ```
 
-**Step 5:** Export the Access Token
-The command above will return a JSON object containing the access_token. You can use jq to extract it and export it as an environment variable for easy use.
-
-Re-run the command above, but pipe the output to jq to extract the token
+Then exchange the code for an access token
 
 ```shell
-export ACCESS_TOKEN=$(curl -sX POST https://poochie.example.com/auth/realms/operator/protocol/openid-connect/token -d "grant_type=authorization_code" -d "client_id=developer-client" -d "client_secret=Yqp2jao1Ruc8UBwk7jwAIJ6Y1jsVT4qJHvQVpduK" -d "code=${AUTH_CODE}" -d "redirect_uri=http://localhost:8080/callback" | jq -r .access_token)
+export ACCESS_TOKEN=$(curl -k -X POST https://poochie.example.com/auth/realms/operator/protocol/openid-connect/token \
+    -d "grant_type=authorization_code" \
+    -d "client_id=developer-client" \
+    -d "client_secret=Yqp2jao1Ruc8UBwk7jwAIJ6Y1jsVT4qJHvQVpduK" \
+    -d "code=${AUTH_CODE}" \
+    -d "redirect_uri=http://localhost:8080/callback" | jq -r .access_token)
 ```
 
 Verify the token is set
