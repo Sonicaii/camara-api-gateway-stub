@@ -155,7 +155,10 @@ export ACCESS_TOKEN=<access-token>
 Providing the access token as bearer authorization, make a request to the Number Verification API:
 
 ```shell
-curl -ikX POST https://poochie.example.com/camara/number-verification/v1/verify -H "Authorization: Bearer ${ACCESS_TOKEN}" -d '{"phoneNumber": "+61234567890"}' -H "Content-Type: application/json"
+curl -ikX POST https://poochie.example.com/camara/number-verification/v1/verify \
+    -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+    -d '{"phoneNumber": "+61234567890"}' \
+    -H "Content-Type: application/json"
 ```
 
 Finally, once you are done, stop the gateway services
