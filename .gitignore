@@ -12,7 +12,7 @@ wheels/
 **/.DS_Store
 .env
 /data
-./application.yaml
+/application.yaml
 docker-compose.yaml
 /specifications
 /tls
