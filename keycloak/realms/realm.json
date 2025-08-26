@@ -1,6 +1,8 @@
 {
   "realm": "operator",
   "enabled": true,
+  "accessTokenLifespan": 1740,
+  "accessCodeLifespan": 600,
   "users": [
     {
       "username": "rex@poochie.dog",
