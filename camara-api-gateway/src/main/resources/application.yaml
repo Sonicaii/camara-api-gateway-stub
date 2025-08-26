@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: camara-api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI:}
+          jwk-set-uri: ${JWKS_URI:}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpserver:
+            wiretap: true
+          httpclient:
+            wiretap: true
+
+logging:
+  level:
+    reactor.netty.http: debug
