@@ -143,7 +143,7 @@ The following Keycloak endpoints (exposed via the gateway) will also be of use.
 
 Keycloak is also configured with a single test user that can be used to login.
 
-- username: rex@poochie.com
+- username: rex@poochie.dog
 - password: password
 
 Once you have an access token, set it in your shell:
