@@ -3,3 +3,5 @@ apis:
     base_path: /number-verification/v1
   - spec: https://raw.githubusercontent.com/camaraproject/NumberVerification/refs/tags/r2.4/code/API_definitions/number-verification.yaml
     base_path: /number-verification/v2
+  - spec: https://raw.githubusercontent.com/camaraproject/RegionDeviceCount/refs/tags/r2.1/code/API_definitions/region-device-count.yaml
+    base_path: /region-device-count/v0
