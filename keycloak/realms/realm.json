@@ -30,6 +30,11 @@
         "*"
       ],
       "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": [
+        "region-device-count",
+        "number-verification:verify"
+      ],
       "optionalClientScopes": [
         "profile"
       ]

@@ -122,6 +122,11 @@ def configure_keycloak_realm(config_path: str) -> dict:
     realm["clientScopes"] = client_scopes
 
     for client in realm.get("clients", []):
+        default_scopes = client.get("defaultClientScopes", [])
+        for scope in scopes:
+            default_scopes.append(scope)
+        client["defaultClientScopes"] = default_scopes
+
         optional_scopes = client.get("optionalClientScopes", [])
         for scope in scopes:
             optional_scopes.append(scope)
